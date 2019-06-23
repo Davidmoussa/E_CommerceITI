@@ -243,6 +243,10 @@
     <Compile Include="Migrations\201906221636052_Farstcreate.Designer.cs">
       <DependentUpon>201906221636052_Farstcreate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201906231726580_update.cs" />
+    <Compile Include="Migrations\201906231726580_update.Designer.cs">
+      <DependentUpon>201906231726580_update.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
@@ -340,6 +344,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201906221636052_Farstcreate.resx">
       <DependentUpon>201906221636052_Farstcreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201906231726580_update.resx">
+      <DependentUpon>201906231726580_update.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

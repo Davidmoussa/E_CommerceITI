@@ -11,7 +11,7 @@ namespace E_CommerceITI.Models
     {
         [Key]
         [ForeignKey("User")]
-        public string SellerId { get; set; }
+        public string CustomerId { get; set; }
         public ApplicationUser User { get; set; }
         public virtual ICollection<AddToWishList> productWishList { get; set; }
         public virtual ICollection<Review> productReview { get; set; }
