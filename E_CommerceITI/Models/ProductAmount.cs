@@ -23,5 +23,6 @@ namespace E_CommerceITI.Models
         public Product Product { get; set; }
 
 
+
     }
 }
