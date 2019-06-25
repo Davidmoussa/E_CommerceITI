@@ -26,10 +26,9 @@ namespace E_CommerceITI.Models
         public int categoryId { get; set; }
         public Category Category { get; set; }
         public virtual ICollection<ProductImage> ProductImage { get; set; }
+        public virtual ICollection<ProductAmount> ProductAmount { get; set; }
         public virtual ICollection<BillItem> items { get; set; }
         public virtual ICollection<Review> productReview { get; set; }
-
         public virtual ICollection<Rate> rates { get; set; }
-
     }
 }
