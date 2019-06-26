@@ -9,8 +9,11 @@ namespace E_CommerceITI.repository
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        private readonly ApplicationDbContext Context;
+       
         DbSet<T> Entity = null;
+
+        public ApplicationDbContext Context;
+
         //Ctors
         public GenericRepository()
         {

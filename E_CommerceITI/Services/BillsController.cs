@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
-using System.Web.Http.Description;
-using E_CommerceITI.Models;
+﻿using E_CommerceITI.Models;
 using E_CommerceITI.repository;
 using E_CommerceITI.Repository;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web.Http;
 
 namespace E_CommerceITI.Services
 {
@@ -24,7 +18,7 @@ namespace E_CommerceITI.Services
             db = new ApplicationDbContext();
         }
 
-       // [Route("AllBillsDetails")]
+        // [Route("AllBillsDetails")]
         // GET: api/Bills
         public List<Bill> GetBills()
         {
@@ -35,24 +29,28 @@ namespace E_CommerceITI.Services
         {
             return Repository.Get(id);
         }
-
-        public List<Bill> GetBillByuserName(string name)
+        [Route("api/bills/{userid}/GetBillByuserId")]
+        public List<Bill> GetBillByuserId(string userid)
         {
-            return db.Bills.Where(b => b.Users.User.UserName == name).ToList();
+            return db.Bills.Where(b => b.Users.User.Id == userid).ToList();
         }
-
+        [Route("api/bills/{id}/GetCountofItems")]
+        public int GetNumberOfItems(int id)
+        {
+            return Repository.GetnumberOfItems(id);
+        }
         public void PostBill(Bill bill)
         {
             Repository.Add(bill);
             Repository.Save();
         }
 
-        public void PutBill( Bill bill)
+        public void PutBill(Bill bill)
         {
             //var existed = Repository.Get(id);   
             Repository.Update(bill);
             Repository.Save();
-           
+
         }
 
         public void DeleteBill(int id)

@@ -10,5 +10,7 @@ namespace E_CommerceITI.Repository
 {
     public interface IBillRepository : IGenericRepository<Bill>
     {
+        //Bill GetLastBill();
+        int GetnumberOfItems(int Id);
     }
 }
