@@ -15,63 +15,118 @@ namespace E_CommerceITI.Controllers
     public class ProductsController : ApiController
     {
         private ApplicationDbContext db = new ApplicationDbContext();
-
+        [HttpGet]
         // GET: api/Products
-        public IHttpActionResult GetProducts()
+        public IHttpActionResult GetAuthorizedProducts()
         {
-            //   var a = new ProductAmount();
-
-            var pro = from p in db.Products
-                     // group p by p.Category into myp
-                    //  where myp.All(a =>a.ProductAmount.Count > 0)
+            var AllProduct = from p in db.Products
+                             where p.Authorized == true
+                             orderby p.items.Count(i=>i.prodId==p.ProductId) descending
                       select new
                       {
                         title = p.Title ,
-                        price =  p.Price,
-                        Amount= p.ProductAmount.Select(o=>o.Amount),
+                        price = p.Price,
+                        TotalAmountInStock= p.ProductAmount.Select(o=>o.Amount).Sum()- p.items.Count(i => i.prodId == p.ProductId),
+                        //p.items.Count(p.items.SingleOrDefault(i=>i.prodId==p.ProductId).prodId),
                         image = p.ProductImage.Select(o => o.imgSrc),
+                        count = p.items.Count(i => i.prodId == p.ProductId)
                       };
-            return Ok(pro.ToList());
+            if (AllProduct == null) { return NotFound(); }
+            else { return Ok(AllProduct.ToList()); }   
+        }
+
+        [Route("api/UnAuthorizedProducts")]
+        public IHttpActionResult GetUnAuthorizedProducts()
+        {
+            var AllProduct = from p in db.Products
+                             where p.Authorized == false
+                             //orderby p.items.Count(i => i.prodId == p.ProductId) descending
+                             select new
+                             {
+                                 title = p.Title,
+                                 price = p.Price,
+                                 TotalAmountInStock= p.ProductAmount.Select(o=>o.Amount).Sum()- p.items.Count(i => i.prodId == p.ProductId),
+                                 image = p.ProductImage.Select(o => o.imgSrc),
+                                // count = p.items.Count(i => i.prodId == p.ProductId)
+                             };
+            if (AllProduct == null) { return NotFound(); }
+            else { return Ok(AllProduct.ToList()); }
+        }
+
+
+        [HttpPut]
+        [Route("api/TOGetUnAuthorizedProductsAndAuthorizeIt/{PId}")]
+        public IHttpActionResult ToGetUnAuthorizedProductsAndAuthorizeIt([FromUri]int PId , [FromBody]string AId )
+        {
+            var AllProduct = db.Products.SingleOrDefault(i => i.ProductId == PId && i.Authorized == false);
+            if (AllProduct == null) { return NotFound(); }
+            else
+            {
+                AllProduct.Authorized = true;
+                AllProduct.AdminAuthId =  AId;
+                db.SaveChanges();
+                return Ok(AllProduct);
+            }
         }
 
         // GET: api/Products/5
+        [HttpGet]
         [ResponseType(typeof(Product))]
-        public IHttpActionResult GetProduct(int id)
+        public IHttpActionResult GetProductById(int id)
         {
-            
-            Product product = db.Products.Find(id);
-            if (product == null)
+          
+            var PrductObject = from product in db.Products
+                      where product.ProductId==id
+                      select new
+                      {
+                          title = product.Title,
+                          price = product.Price,
+                          TotalAmountInStock = product.ProductAmount.Select(o => o.Amount).Sum() - product.items.Count(i => i.prodId == product.ProductId),
+                          Image = product.ProductImage.Select(im=>im.imgSrc)
+                      };
+
+            if (PrductObject == null)
             {
                 return NotFound();
             }
-
-            return Ok(product);
+            return Ok(PrductObject.ToList());
         }
 
+        [HttpGet]
+        [Route("api/Products/{ProductName:alpha}")]
+        //[ResponseType(typeof(Product))]
+        public IHttpActionResult GetProductByName(string ProductName)
+        {
+            var productByName= from product in db.Products
+                               where product.Title == ProductName && product.Authorized==true
+                      select new
+                      {
+                          title = product.Title,
+                          price = product.Price,
+                          TotalAmountInStock = product.ProductAmount.Select(o => o.Amount).Sum() - product.items.Count(i => i.prodId == product.ProductId),
+                          image = product.ProductImage.Select(o => o.imgSrc)
+                      };
+            if (productByName == null) { return NotFound(); }
+            else { return Ok(productByName.ToList()); }
+        }
         // PUT: api/Products/5
         //  [ResponseType(typeof(void))]
-        public IHttpActionResult PutProduct(int id, ProductModels product)//, ProductAmount productAmount , ProductImage productImage)
-
+        public IHttpActionResult PutProduct(int id, ProductModels product)
         {
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
-            //if (id != product.ProductId)
-            //{
-            //    return BadRequest();
-            //}
+          
             else
             {
                 Product P = db.Products.FirstOrDefault(i => i.ProductId == id);
-                P.categoryId = 1;//product.categoryId;
-                P.Authorized = true;
-                P.AdminAuthId = null;
-                P.SellerId = "1"; //product.SellerId;
+               // P.categoryId = 1;
+               // P.Authorized = true;
+               // P.AdminAuthId = null;
+               // P.SellerId = "1";
                 P.Description = product.Description;
-                P.Date = DateTime.Now;
+               // P.Date = DateTime.Now;
                 P.Title = product.Title;
                 P.Price = product.Price;
 
@@ -81,36 +136,16 @@ namespace E_CommerceITI.Controllers
                 proAmout.Amount = product.Amount;
                 proAmout.Date = DateTime.Now;
                 proAmout.Color = product.Color;
-                // P.ProductAmount.Add(new ProductAmount() {Amount=product.Amount});
+                
+                db.ProductAmounts.Add(proAmout);
 
                 ProductImage proImage = db.ProductImages.FirstOrDefault(i => i.productId == id);
                 proImage.imgSrc = null;//img;
-                proImage.productId = P.ProductId;
-                // P.ProductAmount.Add(new ProductAmount() { Color = product.Color, Amount = product.Amount });
-                //db.Entry(P).State = EntityState.Modified;
-                //db.Entry(proAmout).State = EntityState.Modified;
-                //db.Entry(proImage).State = EntityState.Modified;
+                
+                //proImage.productId = P.ProductId;
+                // db.ProductImages.Add(proImage);
                 db.SaveChanges();
-                return StatusCode(HttpStatusCode.NoContent);
-
-                //}
-                //try
-                //{
-                //    db.SaveChanges();
-                //}
-                //catch (DbUpdateConcurrencyException)
-                //{
-                //    if (!ProductExists(id))
-                //    {
-                //        return NotFound();
-                //    }
-                //    else
-                //    {
-                //        throw;
-                //    }
-                //}
-
-                //return StatusCode(HttpStatusCode.NoContent);
+                return Ok(product);
             }
         }
 
@@ -122,84 +157,101 @@ namespace E_CommerceITI.Controllers
             {
                 return BadRequest(ModelState);
             }
-          //  byte[] img = new byte[product.imgSrc.ContentLength];
-           // product.imgSrc.InputStream.Read(img, 0, product.imgSrc.ContentLength);
+            if (product == null)
+            {
+                return BadRequest();
+            }
+             // byte[] img = new byte[product.imgSrc.ContentLength];
+             // product.imgSrc.InputStream.Read(img, 0, product.imgSrc.ContentLength);
+            else
+            {
+                Product NewProduct = new Product();
+                NewProduct.categoryId = 1;
+                NewProduct.Authorized = false;
+                NewProduct.AdminAuthId = null;
+                NewProduct.SellerId = "1";
+                NewProduct.Description = product.Description;
+                NewProduct.Date = DateTime.Now;
+                NewProduct.Title = product.Title;
+                NewProduct.Price = product.Price;
 
-            Product P = new Product();
-            P.categoryId = 1;//product.categoryId;
-            P.Authorized = true;
-            P.AdminAuthId = null;
-            P.SellerId ="1"; //product.SellerId;
-            P.Description = product.Description;
-            P.Date = DateTime.Now;
-            P.Title = product.Title;
-            P.Price = product.Price;
-           
-            ProductAmount proAmout = new ProductAmount();
-            proAmout.ProducId = P.ProductId;
-            proAmout.SellerId = P.SellerId;
-            proAmout.Amount = product.Amount;
-            proAmout.Date= DateTime.Now;
-            proAmout.Color = product.Color;
-            // P.ProductAmount.Add(new ProductAmount() {Amount=product.Amount});
+                ProductAmount NewProductAmount = new ProductAmount();
+                NewProductAmount.ProducId = NewProduct.ProductId;
+                NewProductAmount.SellerId = NewProduct.SellerId;
+                NewProductAmount.Amount = product.Amount;
+                NewProductAmount.Date = DateTime.Now;
+                NewProductAmount.Color = product.Color;
 
-            ProductImage proImage = new ProductImage();
-            proImage.imgSrc = null;//img;
-            proImage.productId = P.ProductId;
-           
-            // P.ProductAmount.Add(new ProductAmount() { Color = product.Color, Amount = product.Amount });
+                ProductImage NewProductImage = new ProductImage();
+                NewProductImage.imgSrc = null;
+                NewProductImage.productId = NewProduct.ProductId;
 
-            db.Products.Add(P);
-            db.ProductAmounts.Add(proAmout);
-            db.ProductImages.Add(proImage);
-           db.SaveChanges();
+                db.Products.Add(NewProduct);
+                db.ProductAmounts.Add(NewProductAmount);
+                db.ProductImages.Add(NewProductImage);
+                db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = P.ProductId }, product);
+                return CreatedAtRoute("DefaultApi", new { id = NewProduct.ProductId }, product);
+            }
         }
-        //public IHttpActionResult PostProduct(ProductModels product)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-        //    byte[] img = new byte[product.imgSrc.ContentLength];
-        //    product.imgSrc.InputStream.Read(img, 0, product.imgSrc.ContentLength);
-        //    Product P = new Product();
-        //    P.categoryId = product.categoryId;
-        //    P.Authorized = product.Authorized;
-        //    P.SellerId = product.SellerId;
-
-        //    P.Description = product.Description;
-        //    P.Date = DateTime.Now;
-        //    P.Title = product.Title;
-        //    P.Price = product.Price;
-        //    P.ProductAmount.Add(new ProductAmount() { Amount = product.Amount });
-        //    P.ProductImage.Add(new ProductImage() { imgSrc = img });
-        //    P.ProductAmount.Add(new ProductAmount() { Color = product.Color, Amount = product.Amount });
-
-        //    db.Products.Add(P);
-        //    db.SaveChanges();
-
-        //    return CreatedAtRoute("DefaultApi", new { id = P.ProductId }, product);
-        //}
-
-
+       
         // DELETE: api/Products/5
-        [ResponseType(typeof(Product))]
+        // [ResponseType(typeof(Product))]
         public IHttpActionResult DeleteProduct(int id)
         {
-            Product product = db.Products.Find(id);
-            if (product == null)
+            Product productToDelete = db.Products.Find(id);
+            var amountOfProduct = (from a in db.ProductAmounts
+                                             where a.ProducId == id
+                                             select a);
+            var ImageOfProduct = from c in db.ProductImages
+                                 where c.productId == id
+                                 select c;
+            var rates = from r in db.Rates
+                        where r.ProductId == id
+                        select r;
+
+            var review = from rev in db.Reviews
+                         where rev.ProducId == id
+                         select rev;
+
+            var wishList = from whish in db.AddToWishLists
+                           where whish.ProducId == id
+                           select whish;
+
+            var billitems = from b in db.BillItems
+                            where b.prodId == id
+                            select b ;
+           
+            if (productToDelete == null || amountOfProduct==null || ImageOfProduct==null)
             {
                 return NotFound();
             }
-
-            db.Products.Remove(product);
+            foreach (var item in amountOfProduct)
+            {
+                db.ProductAmounts.Remove(item);
+            }
+            foreach (var item in ImageOfProduct)
+            {
+                db.ProductImages.Remove(item);
+            }
+            foreach (var item in rates)
+            {
+                db.Rates.Remove(item);
+            }
+            foreach (var item in review)
+            {
+                db.Reviews.Remove(item);
+            }
+            foreach (var item in wishList)
+            {
+                db.AddToWishLists.Remove(item);
+            }
+            db.Products.Remove(productToDelete);
             db.SaveChanges();
 
-            return Ok(product);
+            return Ok(productToDelete);
         }
-
+                 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
