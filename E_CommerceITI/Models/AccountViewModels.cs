@@ -17,8 +17,6 @@ namespace E_CommerceITI.Models
 
     public class ProductModels
     {
-
-
         public string Title { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
