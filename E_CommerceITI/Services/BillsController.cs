@@ -16,103 +16,36 @@ namespace E_CommerceITI.Services
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
+       // [Route("AllBillsDetails")]
         // GET: api/Bills
-        public IQueryable<Bill> GetBills()
+        public List<Bill> GetBills()
         {
-            return db.Bills;
+            return db.Bills.ToList();
         }
 
-        // GET: api/Bills/5
-        [ResponseType(typeof(Bill))]
-        public IHttpActionResult GetBill(int id)
+        public Bill GetBill(int id)
         {
-            Bill bill = db.Bills.Find(id);
-            if (bill == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(bill);
+            return db.Bills.Find(id);
         }
 
-        // PUT: api/Bills/5
-        [ResponseType(typeof(void))]
-        public IHttpActionResult PutBill(int id, Bill bill)
+        public void PostBill(Bill bill)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+             db.Bills.Add(bill);
+            db.SaveChanges();
+        }
 
-            if (id != bill.Id)
-            {
-                return BadRequest();
-            }
-
+        public void PutBill(int id, Bill bill)
+        {
             db.Entry(bill).State = EntityState.Modified;
-
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BillExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
-        }
-
-        // POST: api/Bills
-        [ResponseType(typeof(Bill))]
-        public IHttpActionResult PostBill(Bill bill)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            db.Bills.Add(bill);
             db.SaveChanges();
-
-            return CreatedAtRoute("DefaultApi", new { id = bill.Id }, bill);
         }
 
-        // DELETE: api/Bills/5
-        [ResponseType(typeof(Bill))]
-        public IHttpActionResult DeleteBill(int id)
+        public void DeleteBill(int id)
         {
-            Bill bill = db.Bills.Find(id);
-            if (bill == null)
-            {
-                return NotFound();
-            }
-
-            db.Bills.Remove(bill);
+            db.Bills.Remove(db.Bills.Find(id));
             db.SaveChanges();
-
-            return Ok(bill);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
 
-        private bool BillExists(int id)
-        {
-            return db.Bills.Count(e => e.Id == id) > 0;
-        }
     }
 }
