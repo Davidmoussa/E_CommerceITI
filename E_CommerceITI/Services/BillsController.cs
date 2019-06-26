@@ -28,6 +28,11 @@ namespace E_CommerceITI.Services
             return db.Bills.Find(id);
         }
 
+        public List<Bill> GetBillByuserName(string name)
+        {
+            return db.Bills.Where(b => b.Users.User.UserName == name).ToList();
+        }
+
         public void PostBill(Bill bill)
         {
              db.Bills.Add(bill);

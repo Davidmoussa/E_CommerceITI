@@ -78,7 +78,7 @@ namespace E_CommerceITI.Services
             {
                 return BadRequest(ModelState);
             }
-
+            db.ProductAmounts.Find(db.Products.Find(billItem.prodId)).Amount--;
             db.BillItems.Add(billItem);
             db.SaveChanges();
 
@@ -94,7 +94,7 @@ namespace E_CommerceITI.Services
             {
                 return NotFound();
             }
-
+            db.ProductAmounts.Find(db.Products.Find(billItem.prodId)).Amount++;
             db.BillItems.Remove(billItem);
             db.SaveChanges();
 
