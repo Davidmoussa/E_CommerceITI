@@ -19,7 +19,7 @@ namespace E_CommerceITI.Controllers
         // GET: api/Reviews
         public IHttpActionResult GetReviews()
         {
-            List<Review> reviewList = db.Reviews.ToList();
+            List<Review> reviewList = db.Reviews.Include(i=>i.Customer).Include(i=>i.Product).ToList();
             var response = new { message = "Success", data = reviewList };
             return Ok(response);
             //return db.Reviews;
@@ -29,7 +29,7 @@ namespace E_CommerceITI.Controllers
         [ResponseType(typeof(Review))]
         public IHttpActionResult GetReview(int id)
         {
-            Review review = db.Reviews.Find(id);
+            var review = db.Reviews.Find(id);
             if (review == null)
             {
                 return NotFound();
@@ -139,15 +139,15 @@ namespace E_CommerceITI.Controllers
 
             db.Reviews.Remove(review);
             db.SaveChanges();
-
-            return Ok(review);
+            var mess = new { message = "deleted successfully" };
+            return Ok(mess);
         }
 
         //get review per product
         [Route("api/product/reviews/{prdId}")]
         public IHttpActionResult GetProductReviews(int prdId)
         {
-            List<Review> prdReviewList = db.Reviews.Where(i => i.ProducId == prdId).ToList();
+            List<Review> prdReviewList = db.Reviews.Where(i => i.ProducId == prdId).Include(i=>i.Product).Include(i=>i.Customer).ToList();
             if(prdReviewList.Count() != 0)
             {
                 var mess = new { message = "Success", data = prdReviewList };
@@ -165,7 +165,7 @@ namespace E_CommerceITI.Controllers
         [Route("api/customer/reviews/{customerId}")]
         public IHttpActionResult GetCustomerReviews(int customerId)
         {
-            List<Review> customerReviewList = db.Reviews.Where(i => i.CustomerId == customerId.ToString()).ToList();
+            List<Review> customerReviewList = db.Reviews.Where(i => i.CustomerId == customerId.ToString()).Include(i=>i.Customer).Include(i=>i.Product).ToList();
             if (customerReviewList.Count() != 0)
             {
                 var mess = new { message = "Success", data = customerReviewList };

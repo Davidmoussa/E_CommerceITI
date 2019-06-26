@@ -19,7 +19,7 @@ namespace E_CommerceITI.Controllers
         // GET: api/Rates
         public IHttpActionResult GetRates()
         {
-            List<Rate> rateList = db.Rates.ToList();
+            List<Rate> rateList = db.Rates.Include(i=>i.Customer).Include(i => i.Product).ToList();
             var response = new { message = "Success", data = rateList };
             return Ok(response);
         }
@@ -138,13 +138,13 @@ namespace E_CommerceITI.Controllers
             db.Rates.Remove(rate);
             db.SaveChanges();
 
-            return Ok(rate);
+            return Ok("Deleted Successfully");
         }
         [Route("api/product/rate/{prdId}")]
         // get avrage Rate of the product
         public IHttpActionResult GetProductRate(int prdId)
         {
-            List<Rate> Rates = db.Rates.Where(r => r.ProductId == prdId).ToList();
+            List<Rate> Rates = db.Rates.Where(r => r.ProductId == prdId).Include(i=>i.Customer).Include(i => i.Product).ToList();
             var rateSum = 0;
             if (Rates.Count() != 0)
             {
@@ -170,7 +170,7 @@ namespace E_CommerceITI.Controllers
         [Route("api/customer/rates/{CustId}")]
         public IHttpActionResult GetCustomerRates(string CustId)
         {
-            List<Rate> Rates = db.Rates.Where(r => r.CustomerId == CustId).ToList();
+            List<Rate> Rates = db.Rates.Where(r => r.CustomerId == CustId).Include(i => i.Product).Include(i => i.Customer).ToList();
             if (Rates.Count() != 0)
             {
                 var CustomerRates = new { message = "success", data = Rates };
