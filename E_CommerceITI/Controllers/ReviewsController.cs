@@ -17,9 +17,12 @@ namespace E_CommerceITI.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: api/Reviews
-        public IQueryable<Review> GetReviews()
+        public IHttpActionResult GetReviews()
         {
-            return db.Reviews;
+            List<Review> reviewList = db.Reviews.ToList();
+            var response = new { message = "Success", data = reviewList };
+            return Ok(response);
+            //return db.Reviews;
         }
 
         // GET: api/Reviews/5
@@ -46,7 +49,14 @@ namespace E_CommerceITI.Controllers
 
             if (id != review.ProducId)
             {
-                return BadRequest();
+                return BadRequest("Product ID does not exist");
+            }
+
+            Customer customer = db.Customer.Find(review.CustomerId);
+            if(customer == null)
+            {
+                return BadRequest("Customer ID does not exist");
+
             }
 
             db.Entry(review).State = EntityState.Modified;
@@ -79,6 +89,19 @@ namespace E_CommerceITI.Controllers
                 return BadRequest(ModelState);
             }
 
+            Product product = db.Products.Find(review.ProducId);
+            Customer customer = db.Customer.Find(review.CustomerId);
+
+            if(product == null)
+            {
+                return BadRequest("Product ID doesnot exist");
+            }
+
+            if (customer == null)
+            {
+                return BadRequest("Customer ID doesnot exist");
+            }
+
             db.Reviews.Add(review);
 
             try
@@ -89,7 +112,9 @@ namespace E_CommerceITI.Controllers
             {
                 if (ReviewExists(review.ProducId))
                 {
-                    return Conflict();
+                    //return Conflict();
+                    return ResponseMessage(Request.CreateResponse(HttpStatusCode.Conflict, "review already Exist"));
+
                 }
                 else
                 {
@@ -97,7 +122,9 @@ namespace E_CommerceITI.Controllers
                 }
             }
 
-            return CreatedAtRoute("DefaultApi", new { id = review.ProducId }, review);
+            //return CreatedAtRoute("DefaultApi", new { id = review.ProducId }, review);
+            var addMess = new { message = "Success", data = review};
+            return Ok(addMess);
         }
 
         // DELETE: api/Reviews/5
@@ -114,6 +141,42 @@ namespace E_CommerceITI.Controllers
             db.SaveChanges();
 
             return Ok(review);
+        }
+
+        //get review per product
+        [Route("api/product/reviews/{prdId}")]
+        public IHttpActionResult GetProductReviews(int prdId)
+        {
+            List<Review> prdReviewList = db.Reviews.Where(i => i.ProducId == prdId).ToList();
+            if(prdReviewList.Count() != 0)
+            {
+                var mess = new { message = "Success", data = prdReviewList };
+                return Ok(mess);
+            }
+            else
+            {
+                //var mess = new { message = HttpStatusCode.NotFound };
+                //return Ok(mess);
+                return NotFound();
+            }
+        }
+
+        //get review per customer
+        [Route("api/customer/reviews/{customerId}")]
+        public IHttpActionResult GetCustomerReviews(int customerId)
+        {
+            List<Review> customerReviewList = db.Reviews.Where(i => i.CustomerId == customerId.ToString()).ToList();
+            if (customerReviewList.Count() != 0)
+            {
+                var mess = new { message = "Success", data = customerReviewList };
+                return Ok(mess);
+            }
+            else
+            {
+                //var mess = new { message = HttpStatusCode.NotFound };
+                //return Ok(mess);
+                return NotFound();
+            }
         }
 
         protected override void Dispose(bool disposing)
