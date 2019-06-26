@@ -1,32 +1,34 @@
-﻿using System;
+﻿using E_CommerceITI.Models;
+using E_CommerceITI.Repository;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
-using E_CommerceITI.Models;
 
 namespace E_CommerceITI.Services
 {
     public class BillItemsController : ApiController
     {
-        private ApplicationDbContext db = new ApplicationDbContext();
-
+        private ApplicationDbContext db;
+        BillItemsRepository Repository;
+        public BillItemsController()
+        {
+            Repository = new BillItemsRepository();
+            db = new ApplicationDbContext();
+        }
         // GET: api/BillItems
         public List<BillItem> GetBillItems()
         {
-            return db.BillItems.ToList();
+            return Repository.GetAll().ToList();
         }
 
         // GET: api/BillItems/5
         [ResponseType(typeof(BillItem))]
         public IHttpActionResult GetBillItem(int id)
         {
-            BillItem billItem = db.BillItems.Find(id);
+            BillItem billItem = Repository.Get(id);
             if (billItem == null)
             {
                 return NotFound();
@@ -51,11 +53,10 @@ namespace E_CommerceITI.Services
                 return BadRequest();
             }
 
-            db.Entry(billItem).State = EntityState.Modified;
-
+            Repository.Update(billItem);
             try
             {
-                db.SaveChanges();
+                Repository.Save();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -81,8 +82,8 @@ namespace E_CommerceITI.Services
                 return BadRequest(ModelState);
             }
             db.ProductAmounts.Find(db.Products.Find(billItem.prodId)).Amount--;
-            db.BillItems.Add(billItem);
-            db.SaveChanges();
+            Repository.Add(billItem);
+            Repository.Save();
 
             return CreatedAtRoute("DefaultApi", new { id = billItem.id }, billItem);
         }
@@ -97,9 +98,8 @@ namespace E_CommerceITI.Services
                 return NotFound();
             }
             db.ProductAmounts.Find(db.Products.Find(billItem.prodId)).Amount++;
-            db.BillItems.Remove(billItem);
-            db.SaveChanges();
-
+            Repository.Delete(billItem);
+            Repository.Save();
             return Ok(billItem);
         }
 
