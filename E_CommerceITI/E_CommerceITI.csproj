@@ -255,6 +255,10 @@
     <Compile Include="Migrations\201906231726580_update.Designer.cs">
       <DependentUpon>201906231726580_update.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201906261404025_flag to delete product.cs" />
+    <Compile Include="Migrations\201906261404025_flag to delete product.Designer.cs">
+      <DependentUpon>201906261404025_flag to delete product.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
@@ -357,6 +361,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201906231726580_update.resx">
       <DependentUpon>201906231726580_update.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201906261404025_flag to delete product.resx">
+      <DependentUpon>201906261404025_flag to delete product.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

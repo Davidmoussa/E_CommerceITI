@@ -22,10 +22,10 @@ namespace E_CommerceITI.Models
         
 
         public bool Block { get; set; }
-        //[RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
+        [RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
         [StringLength(50, MinimumLength = 1)]
         public string FirstName { get; set; }
-        //[RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
+        [RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
         [StringLength(50, MinimumLength = 1)]
         public string LastName { get; set; }
         
