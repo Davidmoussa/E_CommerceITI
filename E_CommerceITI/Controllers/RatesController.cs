@@ -17,9 +17,11 @@ namespace E_CommerceITI.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: api/Rates
-        public IQueryable<Rate> GetRates()
+        public IHttpActionResult GetRates()
         {
-            return db.Rates;
+            List<Rate> rateList = db.Rates.ToList();
+            var response = new { message = "Success", data = rateList };
+            return Ok(response);
         }
 
         // GET: api/Rates/5
@@ -46,8 +48,17 @@ namespace E_CommerceITI.Controllers
 
             if (id != rate.ProductId)
             {
-                return BadRequest();
+                return BadRequest("product ID not Exist");
             }
+
+            Customer customer = db.Customer.Find(rate.CustomerId);
+            if (customer == null)
+            {
+                var notFoundMess = new { message = "Customer ID not Exist" };
+                return Content(HttpStatusCode.BadRequest, notFoundMess);
+            }
+
+            
 
             db.Entry(rate).State = EntityState.Modified;
 
@@ -77,6 +88,18 @@ namespace E_CommerceITI.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+
+            Customer customer = db.Customer.Find(rate.CustomerId);
+            if(customer == null)
+            {
+                return BadRequest("Customer ID not Found");
+            }
+
+            Product product = db.Products.Find(rate.ProductId);
+            if(product == null)
+            {
+                return BadRequest("Product ID not Found");
             }
 
             db.Rates.Add(rate);
@@ -115,6 +138,50 @@ namespace E_CommerceITI.Controllers
 
             return Ok(rate);
         }
+        [Route("api/product/rate/{prdId}")]
+        // get avrage Rate of the product
+        public IHttpActionResult GetProductRate(int prdId)
+        {
+            List<Rate> Rates = db.Rates.Where(r => r.ProductId == prdId).ToList();
+            var rateSum = 0;
+            if (Rates.Count() != 0)
+            {
+                foreach (var Rate in Rates)
+                {
+                    rateSum += Rate.Count;
+                }
+                var AverageRate = rateSum / (db.Rates.Where(r => r.ProductId == prdId).ToList().Count());
+                var RateRes =new { Message="Success",RateValue = AverageRate };
+                return Ok(RateRes);
+
+            }
+            else
+            {
+                var notFoundMess = new {message= "product not exist"};
+                return Content(HttpStatusCode.NotFound, notFoundMess);
+
+            }
+
+        }
+
+        //get customer rate to all products
+        [Route("api/customer/rates/{CustId}")]
+        public IHttpActionResult GetCustomerRates(string CustId)
+        {
+            List<Rate> Rates = db.Rates.Where(r => r.CustomerId == CustId).ToList();
+            if (Rates.Count() != 0)
+            {
+                var CustomerRates = new { message = "success", data = Rates };
+                return Ok(CustomerRates);
+            }
+            else
+            {
+                var notFoundMess = new { message = "user do not have rates yet" };
+                return Content(HttpStatusCode.NotFound, notFoundMess);
+            }
+
+        }
+
 
         protected override void Dispose(bool disposing)
         {

@@ -17,9 +17,11 @@ namespace E_CommerceITI.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: api/Categories
-        public IQueryable<Category> GetCategorys()
+        public IHttpActionResult GetCategorys()
         {
-            return db.Categorys;
+            List<Category> categoriesList = db.Categorys.ToList();
+            var mess = new { message = "Success", data = categoriesList };
+            return Ok(mess);
         }
 
         // GET: api/Categories/5
