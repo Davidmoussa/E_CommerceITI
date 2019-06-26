@@ -17,19 +17,21 @@ namespace E_CommerceITI.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: api/Reviews
-        public IHttpActionResult GetReviews()
+        public IHttpActionResult GetAllReviews()
         {
-            List<Review> reviewList = db.Reviews.Include(i=>i.Customer).Include(i=>i.Product).ToList();
+            List<Review> reviewList = db.Reviews.Include(i => i.Customer).Include(i => i.Product).ToList();
             var response = new { message = "Success", data = reviewList };
             return Ok(response);
             //return db.Reviews;
         }
 
-        // GET: api/Reviews/5
+        //get review by id
+        [Route("api/review")]
         [ResponseType(typeof(Review))]
-        public IHttpActionResult GetReview(int id)
+
+        public IHttpActionResult PostReviewbyId(ReviewModel reviewModel)
         {
-            var review = db.Reviews.Find(id);
+            var review = db.Reviews.Include(i => i.Product).Include(i => i.Customer).SingleOrDefault(i => i.ProducId == reviewModel.ProductId && i.CustomerId == reviewModel.CustomerId);
             if (review == null)
             {
                 return NotFound();
@@ -38,28 +40,32 @@ namespace E_CommerceITI.Controllers
             return Ok(review);
         }
 
-        // PUT: api/Reviews/5
-        [ResponseType(typeof(void))]
-        public IHttpActionResult PutReview(int id, Review review)
+        //edit review
+        [Route("api/review/edit/{prdId}")]
+        //[ResponseType(typeof(void))]
+        public IHttpActionResult PutEditReview(int prdId,Review review)
         {
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
-            if (id != review.ProducId)
+            Review re = db.Reviews.Where(i => i.CustomerId == review.CustomerId && i.ProducId == prdId).FirstOrDefault();
+            if (re == null)
             {
-                return BadRequest("Product ID does not exist");
+                return NotFound();
             }
+            re.ProducId = review.ProducId;
+            re.CustomerId = review.CustomerId;
+            re.Content = review.Content;
+            //Customer customer = db.Customer.Find(review.CustomerId);
+            //if(customer == null)
+            //{
+            //    return BadRequest("Customer ID does not exist");
 
-            Customer customer = db.Customer.Find(review.CustomerId);
-            if(customer == null)
-            {
-                return BadRequest("Customer ID does not exist");
+            //}
 
-            }
-
-            db.Entry(review).State = EntityState.Modified;
+            //db.Entry(review).State = EntityState.Modified;
 
             try
             {
@@ -67,14 +73,14 @@ namespace E_CommerceITI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ReviewExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
+                //if ((db.Reviews.Where(i => i.CustomerId == reviewModel.CustomerId && i.ProducId == reviewModel.ProductId)) == null)
+                //{
+                //    return NotFound();
+                //}
+                //else
+                //{
                     throw;
-                }
+                //}
             }
 
             return StatusCode(HttpStatusCode.NoContent);
@@ -92,7 +98,7 @@ namespace E_CommerceITI.Controllers
             Product product = db.Products.Find(review.ProducId);
             Customer customer = db.Customer.Find(review.CustomerId);
 
-            if(product == null)
+            if (product == null)
             {
                 return BadRequest("Product ID doesnot exist");
             }
@@ -123,15 +129,16 @@ namespace E_CommerceITI.Controllers
             }
 
             //return CreatedAtRoute("DefaultApi", new { id = review.ProducId }, review);
-            var addMess = new { message = "Success", data = review};
+            var addMess = new { message = "Success", data = review };
             return Ok(addMess);
         }
 
         // DELETE: api/Reviews/5
-        [ResponseType(typeof(Review))]
-        public IHttpActionResult DeleteReview(int id)
+        [Route("api/review/delete")]
+        //[ResponseType(typeof(Review))]
+        public IHttpActionResult PostDeleteReview(ReviewModel reviewModel)
         {
-            Review review = db.Reviews.Find(id);
+            Review review = db.Reviews.Where(i=>i.CustomerId == reviewModel.CustomerId && i.ProducId == reviewModel.ProductId).FirstOrDefault();
             if (review == null)
             {
                 return NotFound();
@@ -147,8 +154,8 @@ namespace E_CommerceITI.Controllers
         [Route("api/product/reviews/{prdId}")]
         public IHttpActionResult GetProductReviews(int prdId)
         {
-            List<Review> prdReviewList = db.Reviews.Where(i => i.ProducId == prdId).Include(i=>i.Product).Include(i=>i.Customer).ToList();
-            if(prdReviewList.Count() != 0)
+            List<Review> prdReviewList = db.Reviews.Where(i => i.ProducId == prdId).Include(i => i.Product).Include(i => i.Customer).ToList();
+            if (prdReviewList.Count() != 0)
             {
                 var mess = new { message = "Success", data = prdReviewList };
                 return Ok(mess);
@@ -163,9 +170,9 @@ namespace E_CommerceITI.Controllers
 
         //get review per customer
         [Route("api/customer/reviews/{customerId}")]
-        public IHttpActionResult GetCustomerReviews(int customerId)
+        public IHttpActionResult GetCustomerReviews(string customerId)
         {
-            List<Review> customerReviewList = db.Reviews.Where(i => i.CustomerId == customerId.ToString()).Include(i=>i.Customer).Include(i=>i.Product).ToList();
+            List<Review> customerReviewList = db.Reviews.Where(i => i.CustomerId == customerId.ToString()).Include(i => i.Customer).Include(i => i.Product).ToList();
             if (customerReviewList.Count() != 0)
             {
                 var mess = new { message = "Success", data = customerReviewList };

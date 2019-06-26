@@ -14,6 +14,14 @@ namespace E_CommerceITI.Models
 
         public string State { get; set; }
     }
+    public class ReviewModel
+    {
+        public string CustomerId { get; set; }
+
+        public int  ProductId { get; set; }
+
+    }
+
 
     public class ProductModels
     {
