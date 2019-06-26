@@ -9,23 +9,31 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using E_CommerceITI.Models;
+using E_CommerceITI.repository;
+using E_CommerceITI.Repository;
 
 namespace E_CommerceITI.Services
 {
     public class BillsController : ApiController
     {
-        private ApplicationDbContext db = new ApplicationDbContext();
+        private IBillRepository Repository;
+        private ApplicationDbContext db;
+        public BillsController()
+        {
+            Repository = new BillRepository();
+            db = new ApplicationDbContext();
+        }
 
        // [Route("AllBillsDetails")]
         // GET: api/Bills
         public List<Bill> GetBills()
         {
-            return db.Bills.ToList();
+            return Repository.GetAll().ToList();
         }
 
         public Bill GetBill(int id)
         {
-            return db.Bills.Find(id);
+            return Repository.Get(id);
         }
 
         public List<Bill> GetBillByuserName(string name)
@@ -35,20 +43,22 @@ namespace E_CommerceITI.Services
 
         public void PostBill(Bill bill)
         {
-             db.Bills.Add(bill);
-            db.SaveChanges();
+            Repository.Add(bill);
+            Repository.Save();
         }
 
-        public void PutBill(int id, Bill bill)
+        public void PutBill( Bill bill)
         {
-            db.Entry(bill).State = EntityState.Modified;
-            db.SaveChanges();
+            //var existed = Repository.Get(id);   
+            Repository.Update(bill);
+            Repository.Save();
+           
         }
 
         public void DeleteBill(int id)
         {
-            db.Bills.Remove(db.Bills.Find(id));
-            db.SaveChanges();
+            Repository.Delete(id);
+            Repository.Save();
         }
 
 
