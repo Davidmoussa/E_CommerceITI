@@ -34,9 +34,12 @@ namespace E_CommerceITI.Models
         public Seller Seller { get; set; }
         public Customer Customer { get; set; }
 
-        internal Task<ClaimsIdentity> GenerateUserIdentityAsync(ApplicationUserManager userManager, string authenticationType)
+        internal async Task<ClaimsIdentity> GenerateUserIdentityAsync(ApplicationUserManager userManager, string authenticationType)
         {
-            throw new NotImplementedException();
+            var userIdentity =await userManager.CreateIdentityAsync(this,DefaultAuthenticationTypes.ApplicationCookie);
+            // Add custom user claims here
+            return userIdentity;
+            //throw new NotImplementedException();
         }
     }
 
