@@ -19,15 +19,6 @@ namespace E_CommerceITI.Controllers
         // GET: api/AddToWishList
         public IHttpActionResult GetAddToWishLists()
         {
-            /* var add = from a in db.AddToWishLists
-             select new
-             {
-                 CustomerId = a.CustomerId,
-                 ProducId = a.ProducId,
-                 Block = a.Block,
-                 Date = a.Date,
-             };
-             return Ok(add.ToList());*/
             return Ok(db.AddToWishLists.Where(i => i.Block == false).OrderByDescending(i=>i.Date).ToList());
         }
 
@@ -50,7 +41,26 @@ namespace E_CommerceITI.Controllers
         [ResponseType(typeof(void))]
         public IHttpActionResult PutAddToWishList(int id, AddToWishList addToWishList)
         {
-            if (!ModelState.IsValid)
+            var query = (from a in db.AddToWishLists
+                         where a.ProducId == id
+                         select a);
+            foreach(AddToWishList a in query)
+            {
+               // a.ProducId = addToWishList.ProducId;
+                a.CustomerId = addToWishList.CustomerId;
+                a.Date = DateTime.Now;
+                a.Block = addToWishList.Block;
+            }
+            try
+            {
+                db.SaveChanges();
+                return Ok(addToWishList);
+            }
+            catch(Exception e)
+            {
+                return BadRequest("unable to update");
+            }
+           /* if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -128,15 +138,32 @@ namespace E_CommerceITI.Controllers
         [ResponseType(typeof(AddToWishList))]
         public IHttpActionResult DeleteAddToWishList(int id)
         {
-            AddToWishList addToWishList = db.AddToWishLists.Find(id);
-            if (addToWishList == null)
+            // AddToWishList addToWishList = db.AddToWishLists.Find(id);
+            /* var add = from a in db.AddToWishLists
+              select new
+              {
+                  CustomerId = a.CustomerId,
+                  ProducId = a.ProducId,
+                  Block = a.Block,
+                  Date = a.Date,
+              };
+              return Ok(add.ToList());*/
+            var v = (from d in db.AddToWishLists
+                     where d.ProducId == id
+                     select d).FirstOrDefault();
+
+           /* if (addToWishList == null)
             {
                 return NotFound();
-            }
+            }*/
 
-            db.AddToWishLists.Remove(addToWishList);
+//            db.AddToWishLists.Remove(addToWishList);
+            db.AddToWishLists.Remove(v);
+
             db.SaveChanges();
-            return Ok(addToWishList);
+//            return Ok(addToWishList);
+            return Ok(v);
+
         }
 
         protected override void Dispose(bool disposing)
