@@ -282,6 +282,7 @@
     <Compile Include="Results\ChallengeResult.cs" />
     <Compile Include="Services\BillItemsController.cs" />
     <Compile Include="Services\BillsController.cs" />
+    <Compile Include="Shared\SharedController.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
