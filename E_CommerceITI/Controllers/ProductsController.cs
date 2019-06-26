@@ -20,7 +20,7 @@ namespace E_CommerceITI.Controllers
         public IHttpActionResult GetAuthorizedProducts()
         {
             var AllProduct = from p in db.Products
-                             where p.Authorized == true
+                             where p.Authorized == true &&p.deleted==false
                              orderby p.items.Count(i=>i.prodId==p.ProductId) descending
                       select new
                       {
@@ -39,7 +39,7 @@ namespace E_CommerceITI.Controllers
         public IHttpActionResult GetUnAuthorizedProducts()
         {
             var AllProduct = from p in db.Products
-                             where p.Authorized == false
+                             where p.Authorized == false && p.deleted==false
                              //orderby p.items.Count(i => i.prodId == p.ProductId) descending
                              select new
                              {
@@ -58,7 +58,7 @@ namespace E_CommerceITI.Controllers
         [Route("api/TOGetUnAuthorizedProductsAndAuthorizeIt/{PId}")]
         public IHttpActionResult ToGetUnAuthorizedProductsAndAuthorizeIt([FromUri]int PId , [FromBody]string AId )
         {
-            var AllProduct = db.Products.SingleOrDefault(i => i.ProductId == PId && i.Authorized == false);
+            var AllProduct = db.Products.SingleOrDefault(i => i.ProductId == PId && i.Authorized == false && i.deleted==false);
             if (AllProduct == null) { return NotFound(); }
             else
             {
@@ -74,9 +74,9 @@ namespace E_CommerceITI.Controllers
         [ResponseType(typeof(Product))]
         public IHttpActionResult GetProductById(int id)
         {
-          
+
             var PrductObject = from product in db.Products
-                      where product.ProductId==id
+                               where product.ProductId==id &&product.Authorized==true &&product.deleted==false
                       select new
                       {
                           title = product.Title,
@@ -97,8 +97,8 @@ namespace E_CommerceITI.Controllers
         //[ResponseType(typeof(Product))]
         public IHttpActionResult GetProductByName(string ProductName)
         {
-            var productByName= from product in db.Products
-                               where product.Title == ProductName && product.Authorized==true
+            var productByName = from product in db.Products
+                                where product.Title == ProductName && product.Authorized == true && product.deleted == false
                       select new
                       {
                           title = product.Title,
@@ -168,6 +168,7 @@ namespace E_CommerceITI.Controllers
                 Product NewProduct = new Product();
                 NewProduct.categoryId = 1;
                 NewProduct.Authorized = false;
+                NewProduct.deleted = false;
                 NewProduct.AdminAuthId = null;
                 NewProduct.SellerId = "1";
                 NewProduct.Description = product.Description;
@@ -200,55 +201,8 @@ namespace E_CommerceITI.Controllers
         public IHttpActionResult DeleteProduct(int id)
         {
             Product productToDelete = db.Products.Find(id);
-            var amountOfProduct = (from a in db.ProductAmounts
-                                             where a.ProducId == id
-                                             select a);
-            var ImageOfProduct = from c in db.ProductImages
-                                 where c.productId == id
-                                 select c;
-            var rates = from r in db.Rates
-                        where r.ProductId == id
-                        select r;
-
-            var review = from rev in db.Reviews
-                         where rev.ProducId == id
-                         select rev;
-
-            var wishList = from whish in db.AddToWishLists
-                           where whish.ProducId == id
-                           select whish;
-
-            var billitems = from b in db.BillItems
-                            where b.prodId == id
-                            select b ;
-           
-            if (productToDelete == null || amountOfProduct==null || ImageOfProduct==null)
-            {
-                return NotFound();
-            }
-            foreach (var item in amountOfProduct)
-            {
-                db.ProductAmounts.Remove(item);
-            }
-            foreach (var item in ImageOfProduct)
-            {
-                db.ProductImages.Remove(item);
-            }
-            foreach (var item in rates)
-            {
-                db.Rates.Remove(item);
-            }
-            foreach (var item in review)
-            {
-                db.Reviews.Remove(item);
-            }
-            foreach (var item in wishList)
-            {
-                db.AddToWishLists.Remove(item);
-            }
-            db.Products.Remove(productToDelete);
+            productToDelete.deleted = true;
             db.SaveChanges();
-
             return Ok(productToDelete);
         }
                  
