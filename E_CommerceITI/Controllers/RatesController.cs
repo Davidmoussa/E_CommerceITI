@@ -24,11 +24,12 @@ namespace E_CommerceITI.Controllers
             return Ok(response);
         }
 
-        // GET: api/Rates/5
-        [ResponseType(typeof(Rate))]
-        public IHttpActionResult GetRate(int id)
+        // GET: api/Rate
+        //[ResponseType(typeof(Rate))]
+        [Route("api/rate")]
+        public IHttpActionResult PostRate(RateModel rateModel)
         {
-            Rate rate = db.Rates.Find(id);
+            Rate rate = db.Rates.Where(i=>i.CustomerId == rateModel.CustomerId && i.ProductId == rateModel.ProductId).Include(i=>i.Customer).Include(i => i.Customer).FirstOrDefault();
             if (rate == null)
             {
                 return NotFound();
@@ -38,29 +39,30 @@ namespace E_CommerceITI.Controllers
         }
 
         // PUT: api/Rates/5
-        [ResponseType(typeof(void))]
-        public IHttpActionResult PutRate(int id, Rate rate)
+        //[ResponseType(typeof(void))]
+        [Route("api/rate/edit")]
+        public IHttpActionResult PutRate(Rate rate)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            Rate ra = db.Rates.Where(i => i.CustomerId == rate.CustomerId && i.ProductId == rate.ProductId).FirstOrDefault();
 
-            if (id != rate.ProductId)
+            if (ra == null)
             {
-                return BadRequest("product ID not Exist");
+                return BadRequest("product not Exist");
             }
 
-            Customer customer = db.Customer.Find(rate.CustomerId);
-            if (customer == null)
-            {
-                var notFoundMess = new { message = "Customer ID not Exist" };
-                return Content(HttpStatusCode.BadRequest, notFoundMess);
-            }
+            //Customer customer = db.Customer.Find(rate.CustomerId);
+            //if (customer == null)
+            //{
+            //    var notFoundMess = new { message = "Customer ID not Exist" };
+            //    return Content(HttpStatusCode.BadRequest, notFoundMess);
+            //}
 
-            
-
-            db.Entry(rate).State = EntityState.Modified;
+            ra.Count = rate.Count;
+            //db.Entry(rate).State = EntityState.Modified;
 
             try
             {
@@ -68,21 +70,22 @@ namespace E_CommerceITI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!RateExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
+                //if (!RateExists(id))
+                //{
+                //    return NotFound();
+                //}
+                //else
+                //{
                     throw;
-                }
+                //}
             }
 
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/Rates
+        //// POST: api/Rates
         [ResponseType(typeof(Rate))]
+        [Route("api/add/rate")]
         public IHttpActionResult PostRate(Rate rate)
         {
             if (!ModelState.IsValid)
@@ -91,15 +94,11 @@ namespace E_CommerceITI.Controllers
             }
 
             Customer customer = db.Customer.Find(rate.CustomerId);
-            if(customer == null)
-            {
-                return BadRequest("Customer ID not Found");
-            }
-
             Product product = db.Products.Find(rate.ProductId);
-            if(product == null)
+
+            if (customer == null && product == null)
             {
-                return BadRequest("Product ID not Found");
+                return BadRequest("product or customer deos not exist");
             }
 
             db.Rates.Add(rate);
@@ -110,7 +109,7 @@ namespace E_CommerceITI.Controllers
             }
             catch (DbUpdateException)
             {
-                if (RateExists(rate.ProductId))
+                if (db.Rates.Where(i=>i.CustomerId == rate.CustomerId && i.ProductId == rate.ProductId).FirstOrDefault() != null)
                 {
                     //return Conflict();
                     return  ResponseMessage(Request.CreateResponse(HttpStatusCode.Conflict, "rate already Exist"));
@@ -126,10 +125,12 @@ namespace E_CommerceITI.Controllers
         }
 
         // DELETE: api/Rates/5
-        [ResponseType(typeof(Rate))]
-        public IHttpActionResult DeleteRate(int id)
+        //[ResponseType(typeof(Rate))]
+        [Route("api/rate/delete")]
+        public IHttpActionResult PostDeleteRate(RateModel rateModel)
         {
-            Rate rate = db.Rates.Find(id);
+            Rate rate = db.Rates.Where(i => i.CustomerId == rateModel.CustomerId && i.ProductId == rateModel.ProductId).FirstOrDefault();
+
             if (rate == null)
             {
                 return NotFound();

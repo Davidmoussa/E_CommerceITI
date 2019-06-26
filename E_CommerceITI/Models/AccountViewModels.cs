@@ -22,8 +22,16 @@ namespace E_CommerceITI.Models
 
     }
 
+    public class RateModel
+    {
+        public string CustomerId { get; set; }
 
-    public class ProductModels
+        public int ProductId { get; set; }
+
+    }
+
+
+        public class ProductModels
     {
 
 
