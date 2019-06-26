@@ -112,15 +112,17 @@ namespace E_CommerceITI.Controllers
             {
                 if (RateExists(rate.ProductId))
                 {
-                    return Conflict();
+                    //return Conflict();
+                    return  ResponseMessage(Request.CreateResponse(HttpStatusCode.Conflict, "rate already Exist"));
                 }
                 else
                 {
                     throw;
                 }
             }
-
-            return CreatedAtRoute("DefaultApi", new { id = rate.ProductId }, rate);
+            var addMess = new { message = "Success", data = db.Rates.Where(i => i.ProductId == rate.ProductId && i.CustomerId == rate.CustomerId) };
+            return Ok(addMess);
+            //return CreatedAtRoute("DefaultApi", new { id = rate.ProductId }, rate);
         }
 
         // DELETE: api/Rates/5

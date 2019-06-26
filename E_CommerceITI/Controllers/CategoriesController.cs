@@ -33,8 +33,8 @@ namespace E_CommerceITI.Controllers
             {
                 return NotFound();
             }
-
-            return Ok(category);
+            var mess = new { message = "Success", data = category };
+            return Ok(mess);
         }
 
         // PUT: api/Categories/5
@@ -48,7 +48,7 @@ namespace E_CommerceITI.Controllers
 
             if (id != category.id)
             {
-                return BadRequest();
+                return BadRequest("Category ID does not exist");
             }
 
             db.Entry(category).State = EntityState.Modified;
@@ -83,8 +83,9 @@ namespace E_CommerceITI.Controllers
 
             db.Categorys.Add(category);
             db.SaveChanges();
-
-            return CreatedAtRoute("DefaultApi", new { id = category.id }, category);
+            var addMess = new { message = "Success", data = db.Categorys.Find(category.id) };
+            return Ok(addMess);
+            //return CreatedAtRoute("DefaultApi", new { id = category.id }, category);
         }
 
         // DELETE: api/Categories/5
