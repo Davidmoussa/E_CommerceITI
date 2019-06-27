@@ -126,7 +126,7 @@ namespace E_CommerceITI.Controllers
             add.ProducId = addToWishList.ProducId;
             add.CustomerId = addToWishList.CustomerId;
             add.Date = DateTime.Now;
-            add.Customer = db.Customer.SingleOrDefault(i => i.SellerId == addToWishList.CustomerId);
+            add.Customer = db.Customer.SingleOrDefault(i => i.CustomerId == addToWishList.CustomerId);
             add.Block = false;
             db.AddToWishLists.Add(add);
             db.SaveChanges();
