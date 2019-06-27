@@ -16,6 +16,8 @@ using Microsoft.Owin.Security.OAuth;
 using E_CommerceITI.Models;
 using E_CommerceITI.Providers;
 using E_CommerceITI.Results;
+using System.Web.Routing;
+using System.Net.Http.Headers;
 
 namespace E_CommerceITI.Controllers
 {
@@ -327,18 +329,129 @@ namespace E_CommerceITI.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+            
+            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email ,Address=model.Address,LastName=model.LastName,FirstName=model.FirstName, PhoneNumber = model.phonNum };
 
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
+            string UserId = UserManager.FindByName(user.Email).Id.ToString(); //this User id;
+            //Roles Customer
+            RoleManager<IdentityRole> Role = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(new ApplicationDbContext()));
+            if (!Role.RoleExists("Customer"))
+            {
+                Role.Create(new IdentityRole("Customer"));
+                UserManager.AddToRole(UserId, "Customer");
 
+            }
+            else
+            {
+                UserManager.AddToRole(UserId, "Customer");
+            }
+            //add Customer to 
+            using (ApplicationDbContext db=new ApplicationDbContext())
+            {
+                db.Customer.Add(new Customer() { CustomerId = UserId });
+                db.SaveChanges();
+            }
             if (!result.Succeeded)
             {
                 return GetErrorResult(result);
             }
+            else
+            {
 
-            return Ok();
+                return Ok();
+            }
+            
         }
+        // POST api/Account/AdminRegister
+        [AllowAnonymous]
+        [Route("AdminRegister")]
+        public async Task<IHttpActionResult> AdminRegister(RegisterBindingModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email, Address = model.Address, LastName = model.LastName, FirstName = model.FirstName, PhoneNumber = model.phonNum };
+
+            IdentityResult result = await UserManager.CreateAsync(user, model.Password);
+            string UserId = UserManager.FindByName(user.Email).Id.ToString(); //this User id;
+            //Roles Customer
+            RoleManager<IdentityRole> Role = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(new ApplicationDbContext()));
+            if (!Role.RoleExists("Admin"))
+            {
+                Role.Create(new IdentityRole("Admin"));
+                UserManager.AddToRole(UserId, "Admin");
+
+            }
+            else
+            {
+                UserManager.AddToRole(UserId, "Admin");
+            }
+            //add Customer to 
+            using (ApplicationDbContext db = new ApplicationDbContext())
+            {
+                db.Admins.Add(new Admin() { AdminId = UserId });
+                db.SaveChanges();
+            }
+            if (!result.Succeeded)
+            {
+                return GetErrorResult(result);
+            }
+            else
+            {
+
+                return Ok();
+            }
+
+        }
+        // POST api/Account/SellerRegister
+        [AllowAnonymous]
+        [Route("SellerRegister")]
+        public async Task<IHttpActionResult> SellerRegister(SellerRegisterModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email, Address = model.Address, LastName = model.LastName, FirstName = model.FirstName ,PhoneNumber =model.phonNum};
+
+            IdentityResult result = await UserManager.CreateAsync(user, model.Password);
+            string UserId = UserManager.FindByName(user.Email).Id.ToString(); //this User id;
+            //Roles Customer
+            RoleManager<IdentityRole> Role = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(new ApplicationDbContext()));
+            if (!Role.RoleExists("Seller"))
+            {
+                Role.Create(new IdentityRole("Seller"));
+                UserManager.AddToRole(UserId, "Seller");
+
+            }
+            else
+            {
+                UserManager.AddToRole(UserId, "Seller");
+            }
+            //add Customer to 
+            using (ApplicationDbContext db = new ApplicationDbContext())
+            {
+                db.Sellers.Add(new Seller() { SellerId = UserId, Description = model.Description });
+                db.SaveChanges();
+            }
+            if (!result.Succeeded)
+            {
+                return GetErrorResult(result);
+            }
+            else
+            {
+
+                return Ok();
+            }
+
+        }
+       
+       
+
 
         // POST api/Account/RegisterExternal
         [OverrideAuthentication]
@@ -491,4 +604,6 @@ namespace E_CommerceITI.Controllers
 
         #endregion
     }
+
 }
+

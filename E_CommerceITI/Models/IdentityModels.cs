@@ -22,10 +22,10 @@ namespace E_CommerceITI.Models
         
 
         public bool Block { get; set; }
-        //[RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
+        [RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
         [StringLength(50, MinimumLength = 1)]
         public string FirstName { get; set; }
-        //[RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
+        [RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
         [StringLength(50, MinimumLength = 1)]
         public string LastName { get; set; }
         
@@ -34,9 +34,12 @@ namespace E_CommerceITI.Models
         public Seller Seller { get; set; }
         public Customer Customer { get; set; }
 
-        internal Task<ClaimsIdentity> GenerateUserIdentityAsync(ApplicationUserManager userManager, string authenticationType)
+        internal async Task<ClaimsIdentity> GenerateUserIdentityAsync(ApplicationUserManager userManager, string authenticationType)
         {
-            throw new NotImplementedException();
+            var userIdentity =await userManager.CreateIdentityAsync(this,DefaultAuthenticationTypes.ApplicationCookie);
+            // Add custom user claims here
+            return userIdentity;
+            //throw new NotImplementedException();
         }
     }
 
