@@ -47,7 +47,7 @@ namespace E_CommerceITI.Controllers
                                  price = p.Price,
                                  TotalAmountInStock= p.ProductAmount.Select(o=>o.Amount).Sum()- p.items.Count(i => i.prodId == p.ProductId),
                                  image = p.ProductImage.Select(o => o.imgSrc),
-                                // count = p.items.Count(i => i.prodId == p.ProductId)
+                                 Discount = p.Discount.Where(i=>i.EndDate>=DateTime.Now)
                              };
             if (AllProduct == null) { return NotFound(); }
             else { return Ok(AllProduct.ToList()); }
