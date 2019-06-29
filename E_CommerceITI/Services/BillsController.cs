@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace E_CommerceITI.Services
 {
+    [EnableCors(origins: "http://localhost:54834", headers: "*", methods: "*")]
     public class BillsController : ApiController
     {
         private IBillRepository Repository;
