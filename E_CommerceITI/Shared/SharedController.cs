@@ -19,7 +19,6 @@ namespace E_CommerceITI
             smtpClient.Credentials = new NetworkCredential("ecommerce.problems2020@gmail.com", "ECommerceProblems@2020");
             smtpClient.Send("ECommerceProblems@2020", "ECommerceProblems@2020",SenderMail, fullData);
 
-
         }
 
     }
