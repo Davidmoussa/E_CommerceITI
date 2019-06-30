@@ -11,7 +11,7 @@ namespace E_CommerceITI.Models
     {
         [Key]
         public int Id { get; set; }
-        public byte[] imgSrc { get; set; }
+        public string imgSrc { get; set; }
         [ForeignKey("Product")]
         public int  productId { get; set; }
         public Product Product { get; set; }
