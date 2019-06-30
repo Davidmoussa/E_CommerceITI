@@ -31,7 +31,7 @@ namespace E_CommerceITI.Controllers
                         TotalAmountInStock= p.ProductAmount.Select(o=>o.Amount).Sum()- p.items.Count(i => i.prodId == p.ProductId),
                         //p.items.Count(p.items.SingleOrDefault(i=>i.prodId==p.ProductId).prodId),
                         image = p.ProductImage.Select(o => o.imgSrc),
-                        count = p.items.Count(i => i.prodId == p.ProductId)
+                      //  count = p.items.Count(i => i.prodId == p.ProductId)
                       };
             if (AllProduct == null) { return NotFound(); }
             else { return Ok(AllProduct.ToList()); }   
@@ -111,6 +111,31 @@ namespace E_CommerceITI.Controllers
             if (productByName == null) { return NotFound(); }
             else { return Ok(productByName.ToList()); }
         }
+
+        [HttpGet]
+        [Route("api/ProductsWithInCategory/{CatName:alpha}")]
+        public IHttpActionResult GetProductByCategoryName(string CatName)
+        {
+            var Category = db.Categorys.SingleOrDefault(i => i.title == CatName);
+            var products = from p in db.Products
+                           where p.categoryId == Category.id && p.deleted == false && p.Authorized == true
+                           select new
+                           {
+                               title = p.Title,
+                               price = p.Price,
+                               TotalAmountInStock = p.ProductAmount.Select(o => o.Amount).Sum() - p.items.Count(i => i.prodId == p.ProductId),
+                               image = p.ProductImage.Select(o => o.imgSrc)
+                           };
+            if (products == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(products.ToList());
+            }
+        }
+
         // PUT: api/Products/5
         //  [ResponseType(typeof(void))]
         public IHttpActionResult PutProduct(int id, ProductModels product)
@@ -122,7 +147,7 @@ namespace E_CommerceITI.Controllers
           
             else
             {
-                Product P = db.Products.FirstOrDefault(i => i.ProductId == id);
+                Product P = db.Products.FirstOrDefault(i => i.ProductId == id && i.deleted == false );
                // P.categoryId = 1;
                // P.Authorized = true;
                // P.AdminAuthId = null;
@@ -143,8 +168,7 @@ namespace E_CommerceITI.Controllers
 
                 ProductImage proImage = db.ProductImages.FirstOrDefault(i => i.productId == id);
                 proImage.imgSrc = null;//img;
-                
-                //proImage.productId = P.ProductId;
+                proImage.productId = P.ProductId;
                 // db.ProductImages.Add(proImage);
                 db.SaveChanges();
                 return Ok(product);
