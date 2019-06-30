@@ -26,7 +26,7 @@ namespace E_CommerceITI.Models
         
         public DateTime EndDate { get; set; }
         public decimal percentage { get; set; }
-        public ICollection<Discount> discounts { get; set; }
+       
 
         
 

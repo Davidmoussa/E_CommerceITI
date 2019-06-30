@@ -9,10 +9,11 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using E_CommerceITI.Models;
-using System.Web;
+using System.Web.Http.Cors;
 
 namespace E_CommerceITI.Controllers
 {
+    [EnableCors(origins: "http://localhost:54834",headers:"*",methods:"*")]
     public class ProductsController : ApiController
     {
         private ApplicationDbContext db = new ApplicationDbContext();
@@ -48,7 +49,7 @@ namespace E_CommerceITI.Controllers
                                  price = p.Price,
                                  TotalAmountInStock= p.ProductAmount.Select(o=>o.Amount).Sum()- p.items.Count(i => i.prodId == p.ProductId),
                                  image = p.ProductImage.Select(o => o.imgSrc),
-                                // count = p.items.Count(i => i.prodId == p.ProductId)
+                                 Discount = p.Discount.Where(i=>i.EndDate>=DateTime.Now)
                              };
             if (AllProduct == null) { return NotFound(); }
             else { return Ok(AllProduct.ToList()); }
@@ -110,32 +111,9 @@ namespace E_CommerceITI.Controllers
             if (productByName == null) { return NotFound(); }
             else { return Ok(productByName.ToList()); }
         }
-        [HttpGet]
-        [Route("api/ProductsWithInCategory/{CatName:alpha}")]
-        public IHttpActionResult GetProductByCategoryName(string CatName)
-        {
-            var Category = db.Categorys.SingleOrDefault(i => i.title == CatName);
-            var products = from p in db.Products
-                           where p.categoryId == Category.id && p.deleted == false && p.Authorized == true
-                           select new {
-                               title = p.Title,
-                               price = p.Price,
-                               TotalAmountInStock = p.ProductAmount.Select(o => o.Amount).Sum() - p.items.Count(i => i.prodId == p.ProductId),
-                               image = p.ProductImage.Select(o => o.imgSrc)
-                           };
-            if (products == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return Ok(products.ToList());
-            }
-        }
-
         // PUT: api/Products/5
         //  [ResponseType(typeof(void))]
-        public IHttpActionResult PutProduct(int id, ProductModels product)//, HttpPostedFileBase ImagePost)
+        public IHttpActionResult PutProduct(int id, ProductModels product)
         {
             if (!ModelState.IsValid)
             {
@@ -144,11 +122,7 @@ namespace E_CommerceITI.Controllers
           
             else
             {
-                Product P = db.Products.FirstOrDefault(i => i.ProductId == id && i.deleted==false );
-                if (P == null)
-                {
-                    return BadRequest("this product unavialable");
-                }
+                Product P = db.Products.FirstOrDefault(i => i.ProductId == id);
                // P.categoryId = 1;
                // P.Authorized = true;
                // P.AdminAuthId = null;
@@ -164,31 +138,19 @@ namespace E_CommerceITI.Controllers
                 proAmout.Amount = product.Amount;
                 proAmout.Date = DateTime.Now;
                 proAmout.Color = product.Color;
+                
                 db.ProductAmounts.Add(proAmout);
-                //byte[] img = new byte[product.imgSrc.ContentLength];
-                //product.imgSrc.InputStream.Read(img, 0, product.imgSrc.ContentLength);
-
-                //if (ImagePost != null)    // if post  Has image
-                //{
-                //    product.imgSrc = new byte[ImagePost.ContentLength]; //add Img in  Database
-                //    ImagePost.InputStream.Read(post.postImg, 0, ImagePost.ContentLength);
-                //}
 
                 ProductImage proImage = db.ProductImages.FirstOrDefault(i => i.productId == id);
-                
                 proImage.imgSrc = null;//img;
-                //db.ProductImages.Add(proImage);
-
-                proImage.productId = P.ProductId;
-               // byte[] img = new byte[product.imgSrc.ContentLength];
-               // product.imgSrc.InputStream.Read(img, 0, product.imgSrc.ContentLength);
-       
-                db.ProductImages.Add(proImage);
+                
+                //proImage.productId = P.ProductId;
+                // db.ProductImages.Add(proImage);
                 db.SaveChanges();
                 return Ok(product);
             }
         }
- 
+
         // POST: api/Products
         //[ResponseType(typeof(Product))]
         public IHttpActionResult PostProduct(ProductModels product)
@@ -201,7 +163,9 @@ namespace E_CommerceITI.Controllers
             {
                 return BadRequest();
             }
-             else
+             // byte[] img = new byte[product.imgSrc.ContentLength];
+             // product.imgSrc.InputStream.Read(img, 0, product.imgSrc.ContentLength);
+            else
             {
                 Product NewProduct = new Product();
                 NewProduct.categoryId = 1;
@@ -222,10 +186,7 @@ namespace E_CommerceITI.Controllers
                 NewProductAmount.Color = product.Color;
 
                 ProductImage NewProductImage = new ProductImage();
-                //byte[] img = new byte[product.imgSrc.ContentLength];
-                //product.imgSrc.InputStream.Read(img, 0, product.imgSrc.ContentLength);
-
-                NewProductImage.imgSrc = null;//product.imgSrc.InputStream.Read(img, 0, product.imgSrc.ContentLength);
+                NewProductImage.imgSrc = null;
                 NewProductImage.productId = NewProduct.ProductId;
 
                 db.Products.Add(NewProduct);

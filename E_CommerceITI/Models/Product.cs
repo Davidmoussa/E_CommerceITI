@@ -31,6 +31,7 @@ namespace E_CommerceITI.Models
         public virtual ICollection<BillItem> items { get; set; }
         public virtual ICollection<Review> productReview { get; set; }
         public virtual ICollection<Rate> rates { get; set; }
-        
+        public virtual ICollection<Discount> Discount { get; set; }
+
     }
 } 

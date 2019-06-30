@@ -242,6 +242,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AddToWishListsController.cs" />
     <Compile Include="Controllers\CategoriesController.cs" />
+    <Compile Include="Controllers\DiscountsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ProductAmountsController.cs" />
     <Compile Include="Controllers\ProductImagesController.cs" />
@@ -265,6 +266,10 @@
     <Compile Include="Migrations\201906261404025_flag to delete product.cs" />
     <Compile Include="Migrations\201906261404025_flag to delete product.Designer.cs">
       <DependentUpon>201906261404025_flag to delete product.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201906291336573_second.cs" />
+    <Compile Include="Migrations\201906291336573_second.Designer.cs">
+      <DependentUpon>201906291336573_second.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
@@ -380,6 +385,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201906261404025_flag to delete product.resx">
       <DependentUpon>201906261404025_flag to delete product.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201906291336573_second.resx">
+      <DependentUpon>201906291336573_second.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
