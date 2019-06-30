@@ -5,10 +5,13 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using System.Web.Http.Description;
 
 namespace E_CommerceITI.Services
 {
+
+    [EnableCors(origins: "http://localhost:54834", headers: "*", methods: "*")]
     public class BillItemsController : ApiController
     {
         private ApplicationDbContext db;

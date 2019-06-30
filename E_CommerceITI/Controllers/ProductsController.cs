@@ -9,9 +9,11 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using E_CommerceITI.Models;
+using System.Web.Http.Cors;
 
 namespace E_CommerceITI.Controllers
 {
+    [EnableCors(origins: "http://localhost:54834",headers:"*",methods:"*")]
     public class ProductsController : ApiController
     {
         private ApplicationDbContext db = new ApplicationDbContext();
