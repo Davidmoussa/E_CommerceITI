@@ -28,8 +28,8 @@ namespace E_CommerceITI.Models
         public decimal percentage { get; set; }
         public ICollection<Discount> discounts { get; set; }
 
+        
 
-
-
+ 
     }
 }
